@@ -49,12 +49,14 @@ func calculateInput(input string) (string, error) {
 
 	romanINput := false
 
-	if _, ok := romanNumbers[parts[0]]; !ok {
-		panic("Выдача паники, так как используются одновременно разные системы счисления.")
-	}
+	if romanINput {
+		if _, ok := romanNumbers[parts[0]]; !ok {
+			panic("Выдача паники, так как используются одновременно разные системы счисления.")
+		}
 
-	if _, ok := romanNumbers[parts[2]]; !ok {
-		panic("Выдача паники, так как используются одновременно разные системы счисления.")
+		if _, ok := romanNumbers[parts[2]]; !ok {
+			panic("Выдача паники, так как используются одновременно разные системы счисления.")
+		}
 	}
 
 	for key, value := range romanNumbers {
