@@ -35,8 +35,11 @@ func main() {
 // Функция проверки вводимых значений и
 func calculateInput(input string) (string, error) {
 	parts := strings.Fields(input)
-	if len(parts) != 3 {
-		return "", fmt.Errorf("некорректное выражение")
+	if len(parts) < 3 {
+		return "", fmt.Errorf("Выдача паники, так как строка не является математической операцией.")
+	}
+	if len(parts) > 3 {
+		return "", fmt.Errorf("Выдача паники, так как формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *).")
 	}
 
 	romanNumbers := map[string]int{
@@ -47,11 +50,11 @@ func calculateInput(input string) (string, error) {
 	romanINput := false
 
 	if _, ok := romanNumbers[parts[0]]; !ok {
-		panic("Неверный формат вводимых операндов, пожалуйста введите оба операнда арабскими или римскими цифрами!")
+		panic("Выдача паники, так как используются одновременно разные системы счисления.")
 	}
 
 	if _, ok := romanNumbers[parts[2]]; !ok {
-		panic("Неверный формат вводимых операндов, пожалуйста введите оба операнда арабскими или римскими цифрами!")
+		panic("Выдача паники, так как используются одновременно разные системы счисления.")
 	}
 
 	for key, value := range romanNumbers {
@@ -158,7 +161,11 @@ func calculate(num1 int, operator string, num2 int, isRoman bool) (string, error
 	}
 
 	if isRoman {
-		return arabicToRoman(result), nil
+		if result < 0 {
+			panic("Выдача паники, так как в римской системе нет отрицательных чисел.")
+		} else {
+			return arabicToRoman(result), nil
+		}
 	}
 
 	return strconv.Itoa(result), nil
