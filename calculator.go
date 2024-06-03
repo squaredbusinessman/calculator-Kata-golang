@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -28,6 +29,17 @@ func main() {
 	}
 }
 
+func isValidRomanInput(operand1 string, operand2 string, operators map[string]int) bool {
+	_, operand1Exists := operators[operand1]
+	_, operand2Exists := operators[operand2]
+
+	if operand1Exists && operand2Exists {
+		return true
+	} else {
+		return false
+	}
+}
+
 // Функция проверки вводимых значений и
 func calculateInput(input string) string {
 	parts := strings.Fields(input)
@@ -38,28 +50,30 @@ func calculateInput(input string) string {
 		panic("Выдача паники, так как формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *).")
 	}
 
+	// Паттерн для поиска арабских и римских цифр одновременно
+	pattern := `(\b[IVXLCDM]+\b.*\b[0-9]+\b)|(\b[0-9]+\b.*\b[IVXLCDM]+\b)`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllString(input, -1)
+
+	if len(matches) > 0 {
+		panic("Выдача паники, так как используются одновременно разные системы счисления.")
+	}
+
 	romanNumbers := map[string]int{
 		"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5,
 		"VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10,
 	}
 
-	romanINput := false
+	romanInput := isValidRomanInput(parts[0], parts[2], romanNumbers)
 
-	for key, value := range romanNumbers {
-		if parts[0] == key {
-			if _, ok := romanNumbers[parts[0]]; !ok {
-				fmt.Println(parts[0])
-				panic("Выдача паники, так как используются одновременно разные системы счисления.")
+	if romanInput == true {
+		for key, value := range romanNumbers {
+			if parts[0] == key {
+				parts[0] = strconv.Itoa(value)
 			}
-			parts[0] = strconv.Itoa(value)
-			romanINput = true
-		}
-		if parts[2] == key {
-			if _, ok := romanNumbers[parts[2]]; !ok {
-				panic("Выдача паники, так как используются одновременно разные системы счисления.")
+			if parts[2] == key {
+				parts[2] = strconv.Itoa(value)
 			}
-			parts[2] = strconv.Itoa(value)
-			romanINput = true
 		}
 	}
 
@@ -81,11 +95,11 @@ func calculateInput(input string) string {
 		fmt.Errorf("некорректное число: %s", parts[2])
 	}
 
-	if !isValidInput(operand1, operator, operand2) {
+	if !isValidInt(operand1, operator, operand2) {
 		fmt.Errorf("некорректные данные")
 	}
 
-	resultCalculate, err := calculate(operand1, operator, operand2, romanINput)
+	resultCalculate, err := calculate(operand1, operator, operand2, romanInput)
 
 	return resultCalculate
 }
@@ -130,7 +144,7 @@ func arabicToRoman(num int) string {
 }
 
 // Функция проверки валидности оператора
-func isValidInput(operand1 int, operator string, operand2 int) bool {
+func isValidInt(operand1 int, operator string, operand2 int) bool {
 	if operand1 < 1 || operand1 > 10 {
 		panic("Выдача паники, так как разрешены только операнды от 1 до 10 включительно")
 	}
