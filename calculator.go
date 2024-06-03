@@ -21,11 +21,7 @@ func main() {
 			break
 		}
 
-		result, err := calculateInput(input)
-		if err != nil {
-			fmt.Println("Ошибка:", err)
-			break
-		}
+		result := calculateInput(input)
 
 		fmt.Println("Результат:", result)
 		break
@@ -33,13 +29,13 @@ func main() {
 }
 
 // Функция проверки вводимых значений и
-func calculateInput(input string) (string, error) {
+func calculateInput(input string) string {
 	parts := strings.Fields(input)
 	if len(parts) < 3 {
-		return "", fmt.Errorf("Выдача паники, так как строка не является математической операцией.")
+		panic("Выдача паники, так как строка не является математической операцией.")
 	}
 	if len(parts) > 3 {
-		return "", fmt.Errorf("Выдача паники, так как формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *).")
+		panic("Выдача паники, так как формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *).")
 	}
 
 	romanNumbers := map[string]int{
@@ -49,54 +45,53 @@ func calculateInput(input string) (string, error) {
 
 	romanINput := false
 
-	if romanINput {
-		if _, ok := romanNumbers[parts[0]]; !ok {
-			panic("Выдача паники, так как используются одновременно разные системы счисления.")
-		}
-
-		if _, ok := romanNumbers[parts[2]]; !ok {
-			panic("Выдача паники, так как используются одновременно разные системы счисления.")
-		}
-	}
-
 	for key, value := range romanNumbers {
 		if parts[0] == key {
+			if _, ok := romanNumbers[parts[0]]; !ok {
+				fmt.Println(parts[0])
+				panic("Выдача паники, так как используются одновременно разные системы счисления.")
+			}
 			parts[0] = strconv.Itoa(value)
 			romanINput = true
 		}
 		if parts[2] == key {
+			if _, ok := romanNumbers[parts[2]]; !ok {
+				panic("Выдача паники, так как используются одновременно разные системы счисления.")
+			}
 			parts[2] = strconv.Itoa(value)
 			romanINput = true
 		}
 	}
 
 	operand1, err := strconv.Atoi(parts[0])
+	if operand1 < 1 || operand1 > 10 {
+		return "Неверное число, программа работает только с натуральными числами от 0 до 10"
+	}
 	if err != nil {
-		return "", fmt.Errorf("некорректное число: %s", parts[0])
+		fmt.Errorf("некорректное число: %s", parts[0])
 	}
 
 	operator := parts[1]
 
 	operand2, err := strconv.Atoi(parts[2])
+	if operand2 < 1 || operand2 > 10 {
+		return "Неверное число, программа работает только с натуральными числами от 0 до 10"
+	}
 	if err != nil {
-		return "", fmt.Errorf("некорректное число: %s", parts[2])
+		fmt.Errorf("некорректное число: %s", parts[2])
 	}
 
-	if !isValidInput(operator) {
-		return "", fmt.Errorf("некорректные данные")
+	if !isValidInput(operand1, operator, operand2) {
+		fmt.Errorf("некорректные данные")
 	}
 
 	resultCalculate, err := calculate(operand1, operator, operand2, romanINput)
 
-	return resultCalculate, nil
+	return resultCalculate
 }
 
 // Функция для преобразования арабского числа в римское
 func arabicToRoman(num int) string {
-	if num < 0 || num > 100 {
-		return "Неверное число, программа работает только с натуральными числами от 0 до 10"
-	}
-
 	// Определение римских цифр и их значения
 	romanNumerals := map[int]string{
 		1: "I", 2: "II", 3: "III", 4: "IV", 5: "V",
@@ -135,7 +130,15 @@ func arabicToRoman(num int) string {
 }
 
 // Функция проверки валидности оператора
-func isValidInput(operator string) bool {
+func isValidInput(operand1 int, operator string, operand2 int) bool {
+	if operand1 < 1 || operand1 > 10 {
+		panic("Выдача паники, так как разрешены только операнды от 1 до 10 включительно")
+	}
+
+	if operand2 < 1 || operand2 > 10 {
+		panic("Выдача паники, так как разрешены только операнды от 1 до 10 включительно")
+	}
+
 	operators := map[string]bool{"+": true, "-": true, "*": true, "/": true}
 
 	_, operatorIsValid := operators[operator]
@@ -163,8 +166,8 @@ func calculate(num1 int, operator string, num2 int, isRoman bool) (string, error
 	}
 
 	if isRoman {
-		if result < 0 {
-			panic("Выдача паники, так как в римской системе нет отрицательных чисел.")
+		if result < 1 {
+			panic("Выдача паники, так как в римской системе нет отрицательных чисел и числа 0.")
 		} else {
 			return arabicToRoman(result), nil
 		}
